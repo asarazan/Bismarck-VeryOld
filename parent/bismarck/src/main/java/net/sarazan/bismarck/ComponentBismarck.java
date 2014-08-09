@@ -11,7 +11,7 @@ import net.sarazan.bismarck.procedures.i.Setter;
 import net.sarazan.bismarck.procedures.persisters.MemoryPersister;
 import net.sarazan.bismarck.run.Runnable1;
 import net.sarazan.bismarck.run.RunnableR;
-import net.sarazan.bismarck.util.RateLimiter;
+import net.sarazan.bismarck.rate.RateLimiter;
 
 /**
  * Created by Aaron Sarazan on 6/22/14

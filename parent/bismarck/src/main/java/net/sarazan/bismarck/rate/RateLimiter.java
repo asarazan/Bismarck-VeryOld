@@ -1,4 +1,4 @@
-package net.sarazan.bismarck.util;
+package net.sarazan.bismarck.rate;
 
 import android.content.Context;
 

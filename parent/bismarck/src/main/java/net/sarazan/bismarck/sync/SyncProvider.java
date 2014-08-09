@@ -3,8 +3,8 @@ package net.sarazan.bismarck.sync;
 import android.content.Context;
 
 import net.sarazan.bismarck.run.RunnableR;
-import net.sarazan.bismarck.util.IRateLimiter;
-import net.sarazan.bismarck.util.RateLimiter;
+import net.sarazan.bismarck.rate.IRateLimiter;
+import net.sarazan.bismarck.rate.RateLimiter;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
