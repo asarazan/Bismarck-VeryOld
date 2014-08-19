@@ -2,9 +2,9 @@ package net.sarazan.bismarck.endpoint.i;
 
 import android.content.Context;
 
-import org.jetbrains.annotations.NotNull;
+import com.squareup.okhttp.Request.Builder;
 
-import java.net.HttpURLConnection;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by Aaron Sarazan on 5/18/14
@@ -12,5 +12,5 @@ import java.net.HttpURLConnection;
  */
 public interface Processor {
 
-    void processConnection(@NotNull Context context, @NotNull HttpURLConnection conn);
+    void processRequest(@NotNull Context context, @NotNull Builder requestBuilder);
 }

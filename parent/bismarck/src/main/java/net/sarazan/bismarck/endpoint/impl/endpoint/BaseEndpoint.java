@@ -2,9 +2,13 @@ package net.sarazan.bismarck.endpoint.impl.endpoint;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Request.Builder;
+import com.squareup.okhttp.RequestBody;
 
 import net.sarazan.bismarck.endpoint.factory.Responses;
 import net.sarazan.bismarck.endpoint.i.Callback;
@@ -16,10 +20,9 @@ import net.sarazan.bismarck.endpoint.i.Serializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +32,12 @@ import java.util.Map;
  * Copyright(c) 2014 Manotaur, LLC.
  */
 public abstract class BaseEndpoint<REQ, RES> implements Endpoint<REQ, RES> {
+
+    public enum Method {
+        GET,
+        POST,
+        // TODO
+    }
 
     private static final String TAG = "BaseEndpoint";
 
@@ -54,33 +63,40 @@ public abstract class BaseEndpoint<REQ, RES> implements Endpoint<REQ, RES> {
             return Responses.failedResponse(new IllegalArgumentException("Null context"));
         }
         OkHttpClient client = new OkHttpClient();
-        HttpURLConnection conn = client.open(getURL());
+        Request.Builder b = new Builder().url(getURL());
         Map<String, String> headers = applyHeaders(new HashMap<String, String>());
         for (String key : headers.keySet()) {
-            conn.addRequestProperty(key, headers.get(key));
+            b.header(key, headers.get(key));
         }
         if (mProcessor != null) {
-            mProcessor.processConnection(c, conn);
+            mProcessor.processRequest(c, b);
         }
-        OutputStream os = null;
         InputStream is = null;
         try {
-            conn.setRequestMethod(getMethod());
-            os = conn.getOutputStream();
-            REQ request = getRequest();
-            int length = mSerializer.serializeRequest(os, request);
-            Log.d(TAG, "Sending " + length + " bytes");
-            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                return fail(Responses.<RES>failedResponse(conn.getResponseCode()));
+            switch (method()) {
+                case GET:
+                    b.get();
+                    break;
+                case POST:
+                    REQ request = getRequest();
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    mSerializer.serializeRequest(bos, request);
+                    b.post(RequestBody.create(MediaType.parse(contentType()), bos.toByteArray()));
+                    break;
             }
-            is = conn.getInputStream();
+            Request req = b.build();
+            Call call = client.newCall(req);
+            com.squareup.okhttp.Response res = call.execute();
+            if (!res.isSuccessful()) {
+                return fail(Responses.<RES>failedResponse(res.code()));
+            }
+            is = res.body().byteStream();
             RES response = mSerializer.deserializeResponse(is);
             return succeed(Responses.createResponse(response));
         } catch (IOException e) {
             fail(Responses.<RES>failedResponse(e));
         } finally {
             try {
-                if (os != null) os.close();
                 if (is != null) is.close();
             } catch (IOException ignored) {}
         }
@@ -111,8 +127,13 @@ public abstract class BaseEndpoint<REQ, RES> implements Endpoint<REQ, RES> {
     }
 
     @NotNull
-    protected String getMethod() {
-        return "GET";
+    protected Method method() {
+        return Method.GET;
+    }
+
+    @NotNull
+    protected String contentType() {
+        return "text/plain";
     }
 
     private Response<RES> succeed(Response<RES> response) {

@@ -8,8 +8,6 @@ import net.sarazan.bismarck.endpoint.impl.serializer.WireSerializer;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-
 /**
  * Created by Aaron Sarazan on 5/13/14
  * Copyright(c) 2014 Manotaur, LLC.
@@ -25,15 +23,13 @@ public abstract class WireEndpoint<T extends Message, R extends Message> extends
 
     @NotNull
     @Override
-    protected String getMethod() {
-        return "POST";
+    protected Method method() {
+        return Method.POST;
     }
 
     @NotNull
     @Override
-    protected Map<String, String> applyHeaders(@NotNull Map<String, String> headers) {
-        headers = super.applyHeaders(headers);
-        headers.put("Content-Type", "application/x-protobuf");
-        return headers;
+    protected String contentType() {
+        return "application/x-protobuf";
     }
 }
