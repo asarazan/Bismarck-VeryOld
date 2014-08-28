@@ -2,8 +2,8 @@ package net.sarazan.bismarck;
 
 import android.content.Context;
 
-import net.sarazan.bismarck.endpoint.i.Response;
 import net.sarazan.bismarck.procedures.i.Adder;
+import net.sarazan.bismarck.procedures.i.Callback;
 import net.sarazan.bismarck.procedures.i.Deleter;
 import net.sarazan.bismarck.procedures.i.Getter;
 import net.sarazan.bismarck.procedures.i.Persister;
@@ -51,27 +51,29 @@ public class ComponentBismarck<T> implements Bismarck<T> {
     }
 
     @Override
-    public void fetch(Runnable1<T> callback, boolean force) {
+    public void fetch(final Runnable1<T> callback, boolean force) {
         assertNotNull(mGetter);
 
-        final Runnable1<Response<T>> runnable = new Runnable1<Response<T>>() {
+        final Callback<T> callbackInternal = new Callback<T>() {
             @Override
-            public void run(Response<T> arg1) {
-                if (arg1.isSuccess()) {
-                    mPersister.update(mContext, arg1.getData());
-                } else if (mRateLimiter != null) {
-                    mRateLimiter.reset(mContext);
-                }
+            public void onSuccess(T response) {
+                mPersister.update(mContext, response);
+                callback.run(response);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                mRateLimiter.reset(mContext);
             }
         };
 
         if (mRateLimiter == null) {
-          mGetter.get(mContext, runnable);
+            mGetter.get(mContext, callbackInternal);
         } else {
             mRateLimiter.run(mContext, new RunnableR<Boolean>() {
                 @Override
                 public Boolean run() {
-                    mGetter.get(mContext, runnable);
+                    mGetter.get(mContext, callbackInternal);
                     return true;
                 }
             }, force);
