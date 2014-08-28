@@ -7,7 +7,7 @@ repositories {
     }
 }
 
-version = '1.0.1'
+version = '1.0.2'
 group = 'net.sarazan.bismarck'
 
 android {
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         applicationId "net.sarazan.bismarck"
-        minSdkVersion 15
+        minSdkVersion 14
         targetSdkVersion 20
         versionCode 1
         versionName version
