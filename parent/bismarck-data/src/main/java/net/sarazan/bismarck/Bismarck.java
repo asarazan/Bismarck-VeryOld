@@ -2,11 +2,11 @@ package net.sarazan.bismarck;
 
 import android.util.Log;
 
-import com.levelmoney.bismarck.i.Cache;
-import com.levelmoney.bismarck.i.Delete;
-import com.levelmoney.bismarck.i.Fetch;
-import com.levelmoney.bismarck.i.Insert;
-import com.levelmoney.common.data.endpoint.Response;
+import net.sarazan.bismarck.i.Cache;
+import net.sarazan.bismarck.i.Delete;
+import net.sarazan.bismarck.i.Fetch;
+import net.sarazan.bismarck.i.Insert;
+import net.sarazan.bismarck.i.Response;
 
 import org.jetbrains.annotations.NotNull;
 
